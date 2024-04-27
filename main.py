@@ -9,7 +9,7 @@ import openmv_numpy as np
 sensor.reset()
 sensor.set_pixformat(sensor.RGB565)
 sensor.set_framesize(sensor.QVGA)
-sensor.set_brightness(1000)
+sensor.set_brightness(2000)
 sensor.skip_frames(time = 100)
 sensor.set_auto_gain(False)  # must turn this off to prevent image washout...
 sensor.set_auto_whitebal(False,(0,0x80,0))  # must turn this off to prevent image washout...
@@ -17,12 +17,14 @@ sensor.set_auto_exposure(False,100)
 
 uart = UART(1, baudrate=115200)
 
+
 world_coordinates = np.array([[40,140],
                      [180,140],
                      [180,40],
                      [40,40]])
 
 
+weitiao_threshold = [(68, 100, -78, 127, -11, 127)]
 
 detect_area = [0,65,319,175]
 result_area = [122,83,83,35]
@@ -73,7 +75,7 @@ def map(img):
         point_num=0
         #if r.w()>=135 and r.h()<105 and r.w()<150 and r.h()>90:
         #if r.w()>=230 and r.h()<180 and r.w()<260 and r.h()>160:
-        if r.w()>=113 and r.h()<85 and r.w()<120 and r.h()>75:
+        if r.w()>=100 and r.h()<90 and r.w()<120 and r.h()>70:
             img.draw_rectangle(r.rect(), color = (255, 0, 0))
             #print(r.rect())
             img_coordinate=[]
@@ -109,12 +111,26 @@ def map(img):
 
 #####################
 def shi() :
+      #sensor.reset()
+      #sensor.set_pixformat(sensor.RGB565)
+      #sensor.set_framesize(sensor.QVGA) # we run out of memory if the resolution is much bigger...
+      #sensor.set_brightness(2000)
+      #sensor.skip_frames(time = 20)
+      #sensor.set_auto_gain(True)  # must turn this off to prevent image washout...
+      #sensor.set_auto_whitebal(True)
+      #sensor.set_auto_whitebal(False,(0,0x80,0))  # must turn this off to prevent image washout...
+      #clock = time.clock()
+
+      #net_path = "128model_24_0.9842.tflite"                                  # 定义模型的路径
+      #labels = [line.rstrip() for line in open("/sd/shibie.txt")]   # 加载标签
+      #net = tf.load(net_path, load_to_fb=True)                                  # 加载模型
+
 
       while(True):
           img = sensor.snapshot()
 
 
-          for r in img.find_rects(threshold = 10000):             # 在图像中搜索矩形
+          for r in img.find_blobs(weitiao_threshold , margin=1 , merge=True ,invert=0 ):             # 在图像中搜索矩形
             if r.w()>=60 and r.h()<90 and r.w()<90 and r.h()>60:
               img.draw_rectangle(r.rect(), color = (255, 0, 0))   # 绘制矩形外框，便于在IDE上查看识别到的矩形位置
               img1 = img.copy(1,1,r.rect())                           # 拷贝矩形框内的图像
@@ -135,81 +151,81 @@ def shi() :
                   sorted_list = sorted(zip(labels, obj.output()), key = lambda x: x[1], reverse = True)
                   # 打印准确率最高的结果
                   for i in range(1):
-                      if sorted_list[i][1]<0.30:
+                      if sorted_list[i][1]<0.80:
                            continue
                       print("%s = %f" % (sorted_list[i][0], sorted_list[i][1]))
                       #uart.write('%s'%(sorted_list[i][0]))
 
                       if(sorted_list[i][0]=='bean'):
                         #uart.write('6,')
-                        uart.write('1,-')
-                        print('1,-')
+                        uart.write('3,-')
+                        print('3,-')
                         break
 
                       if(sorted_list[i][0]=='orange'):
                         #uart.write('6,')
-                        uart.write('1,-')
-                        print('1,-')
+                        uart.write('3,-')
+                        print('3,-')
                         break
 
                       if(sorted_list[i][0]=='cabbage'):
                         #uart.write('6,')
-                        uart.write('1,-')
-                        print('1,-')
+                        uart.write('3,-')
+                        print('3,-')
                         break
 
                       if(sorted_list[i][0]=='potato'):
                         #uart.write('6,')
-                        uart.write('2,-')
-                        print('2,-')
+                        uart.write('4,-')
+                        print('4,-')
                         break
 
                       if(sorted_list[i][0]=='durian'):
                         #uart.write('6,')
-                        uart.write('2,-')
-                        print('2,-')
+                        uart.write('4,-')
+                        print('4,-')
                         break
 
                       if(sorted_list[i][0]=='cucumber'):
                         #uart.write('6,')
-                        uart.write('2,-')
-                        print('2,-')
+                        uart.write('4,-')
+                        print('4,-')
                         break
 
                       if(sorted_list[i][0]=='peanut'):
                         #uart.write('6,')
-                        uart.write('3,-')
-                        print('3,-')
+                        uart.write('2,-')
+                        print('2,-')
                         break
 
                       if(sorted_list[i][0]=='apple'):
                         #uart.write('6,')
-                        uart.write('3,-')
-                        print('3,-')
+                        uart.write('2,-')
+                        print('2,-')
                         break
 
                       if(sorted_list[i][0]=='chili'):
                         #uart.write('6,')
-                        uart.write('3,-')
-                        print('3,-')
+                        uart.write('2,-')
+                        print('2,-')
                         break
 
                       if(sorted_list[i][0]=='rice'):
                         #uart.write('6,')
-                        uart.write('4,-')
-                        print('4,-')
+                        uart.write('1,-')
+                        print('1,-')
                         break
 
                       if(sorted_list[i][0]=='banana'):
                         #uart.write('6,')
-                        uart.write('4,-')
-                        print('4,-')
+                        uart.write(',-')
+                        print('1,-')
                         break
 
                       if(sorted_list[i][0]=='radish'):
                         #uart.write('6,')
-                        uart.write('4,-')
-                        print('4,-')
+                        uart.write('1,-')
+                        print('1,-')
                         break
 
                       if(sorted_list[i][0]=='corn'):
@@ -243,7 +259,7 @@ def weitiao():
     # 在图像中查找矩形
     img = sensor.snapshot()
     img.draw_rectangle(119, 111, 30, 27, color=(255,0,0))
-    rects = img.find_rects(threshold = 10000)
+    rects = img.find_blobs(weitiao_threshold , margin=1 , merge=True ,invert=0 )
 
     # 遍历所有检测到的矩形
     for r in rects:
@@ -254,8 +270,8 @@ def weitiao():
             rect_center = (r.x() + r.w() // 2, r.y() + r.h() // 2)
             img.draw_cross(rect_center[0], rect_center[1])
             # 计算矩形中心点相对于目标位置的偏差
-            dx = rect_center[0] - 134
-            dy = rect_center[1] - 110
+            dx = rect_center[0] - 146
+            dy = rect_center[1] - 156
             # 判断矩形相对于车的位置
 
             if abs(dx) <=15 and abs(dy)<=13:
@@ -263,6 +279,7 @@ def weitiao():
                 uart.write('6,')
                 #uart.write('1,-')
                 #time.sleep(2)
+                time.sleep(0.1)
                 #sensor.set_framesize(sensor.QVGA)
                 shi()
                 time.sleep(2)
@@ -346,9 +363,10 @@ if __name__ == '__main__':
                 y = (y//20)*20+10
                 real_point.append([int(x),int(y)])
 
-        if len(points)!=3:
+        if len(points)<10:
              continue
         print(len(points))
+        blue.on()
 
         #uart.write('go\n')
         #uart.write("%d,"%len(points))
